@@ -1,4 +1,5 @@
 from pathlib import Path
+import random
 from PIL import Image as Im
 from PIL import ImageEnhance, ImageFilter
 import os, sys
@@ -17,7 +18,6 @@ class ImageAugmentation:
         with Im.open(image_path) as image:
             self.results = { func.__name__: func(image) for func in functions }
 
-
     def export(self, dest_path: str):
         os.makedirs(dest_path, exist_ok=True)
 
@@ -31,27 +31,27 @@ class ImageAugmentation:
 
     @classmethod
     def rotate(cls, image: Im.Image) -> Im.Image:
-        return image.rotate(30)
+        return image.rotate(random.randrange(10, 40))
     
     @classmethod
     def transpose(cls, image: Im.Image) -> Im.Image:
-        return image.transpose(Im.Transpose.FLIP_TOP_BOTTOM)
+        return image.transpose(random.choice(Im.Transpose.FLIP_TOP_BOTTOM))
     
     @classmethod
     def blur(cls, image: Im.Image) -> Im.Image:
-        return image.filter(ImageFilter.GaussianBlur(15))
+        return image.filter(ImageFilter.GaussianBlur(random.randrange(5, 30)))
     
     @classmethod
     def contrast(cls, image: Im.Image) -> Im.Image:
-        return ImageEnhance.Contrast(image).enhance(2.6)
+        return ImageEnhance.Contrast(image).enhance(random.uniform(1.9, 4.0))
     
     @classmethod
     def brightness(cls, image: Im.Image) -> Im.Image:
-        return ImageEnhance.Brightness(image).enhance(0.6)
+        return ImageEnhance.Brightness(image).enhance(random.uniform(0.3, 0.7))
     
     @classmethod
     def scale(cls, image: Im.Image) -> Im.Image:
-        zoom = 0.2
+        zoom = random.uniform(0.1, 0.4)
         w, h = image.width, image.height
 
         zm = image.crop((w * zoom, h * zoom, w - w * zoom, h - h * zoom))
@@ -59,10 +59,16 @@ class ImageAugmentation:
     
     @classmethod
     def projective(cls, image: Im.Image) -> Im.Image:
-        t_data = [1.25, 0.1, -110, 0.11, 1.25, -110]
+        a = 1 + random.uniform(-0.25, 0.25)  # scale X
+        b = random.uniform(-0.15, 0.15)      # shear X
+        c = random.uniform(-50, 50)          # translate X
+        d = random.uniform(-0.15, 0.15)      # shear Y
+        e = 1 + random.uniform(-0.25, 0.25)  # scale Y
+        f = random.uniform(-50, 50)          # translate Y
+
         w, h = image.width, image.height
 
-        return image.transform((w, h), Im.AFFINE, t_data)
+        return image.transform((w, h), Im.AFFINE, (a, b, c, d, e, f))
 
 def main():
     if len(sys.argv) == 2:
