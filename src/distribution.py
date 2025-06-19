@@ -20,6 +20,8 @@ def generate_histogram(data: dict[str, int]):
 
 if __name__ == "__main__":
     if (len(sys.argv) == 2 and os.path.exists(sys.argv[1])):
-        generate_histogram(Loader(sys.argv[1]).count())
+        count = Loader(sys.argv[1]).count()
+        print(count)
+        generate_histogram(count)
     else:
         print("./Distribution.py <dataset_folder>")

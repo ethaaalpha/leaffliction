@@ -2,3 +2,7 @@
 output
 __pycache__
 leaves.zip
+images/
+dataset*
+transformed_directory/
+.DS_Store

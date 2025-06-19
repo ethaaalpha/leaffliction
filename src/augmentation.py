@@ -1,16 +1,20 @@
 import math
 import os
-from pathlib import Path
 import shutil
-from src.preprocessing.img_augmentation import ImageAugmentation as IAug
-from src.preprocessing.loader import Loader
-from PIL import Image as Im
 import random
+from PIL import Image as Im
+from argparse import ArgumentParser, ArgumentTypeError
+
+from matplotlib import pyplot as plt
+from preprocessing.augmentors import Augmentators as Augs
+from preprocessing.loader import Loader
+from utils import log, log_dynamic
+from os.path import join
 
 random.seed(42)
 
 # preference order for augmentations
-AUGMENTATIONS = [IAug.rotate, IAug.contrast, IAug.brightness, IAug.projective, IAug.blur, IAug.scale]
+AUGMENTATIONS = [Augs.rotate, Augs.contrast, Augs.brightness, Augs.projective, Augs.blur, Augs.scale]
 
 def determine_missing(tab: dict[str, int], target_per_class: int) -> dict[str, int]:
     missing = {}
@@ -26,33 +30,40 @@ def determine_augmentation_per_images(count: dict[str, int], missing: dict[str, 
         augm[k] = v / count[k] 
     return augm
 
-def copy_original_images(tab: dict[str, list[str]], result_directory: str):
-    for _class, files in tab.items():
-        new_directory = os.path.join(result_directory, _class)
-        os.makedirs(new_directory, exist_ok=True)
+def plot_images(images: dict[str, Im.Image]):
+    _, axs = plt.subplots(2, 3)
 
-        for file in files:
-            dest_path = os.path.join(new_directory, os.path.basename(file))
-            shutil.copyfile(file, dest_path)
+    for ax, (name, img) in zip(axs.flatten(), images.items()):
+        ax.imshow(img)
+        ax.set_title(name)
+        ax.axis('off')
 
+    plt.tight_layout()
+    plt.show()
 
-def generate_image(result_directory: str, files: list[str], augm_per_image: float, max_imgs: int):
+def generate_augmentation(result_directory: str, files: list[str], augm_per_image: float, max_imgs: int, display: bool = False):
     count = 0
     random.shuffle(files)
+    to_display = {}
 
     for img_path in files:
-        with Im.open(img_path) as img:
-            for i in range(math.ceil(augm_per_image)):
-                if count >= max_imgs:
-                    break
-                else:
-                    image_augmented = AUGMENTATIONS[i](img)
-                    augmentation_name = AUGMENTATIONS[i].__name__
-                    name, ext = os.path.splitext(os.path.basename(img.filename))
+        augmentor = Augs(img_path)
 
-                    image_augmented.save(os.path.join(result_directory, f"{name}_{augmentation_name}{ext}"))
-                    count += 1
-                    print(f"{count}/{max_imgs} generated!", end='\r', flush=True)
+        for i in range(math.ceil(augm_per_image)):
+            if count >= max_imgs:
+                break
+            else:
+                image_augmented = AUGMENTATIONS[i](augmentor)
+                augmentation_name = AUGMENTATIONS[i].__name__
+                name, ext = Loader.get_name_ext(img_path)
+
+                log_dynamic(f"working on: {name.ljust(42)} ({count}/{max_imgs})")
+
+                augmentor.export_image(image_augmented, join(result_directory, f"{name}_{augmentation_name}{ext}"))
+                to_display[augmentation_name] = image_augmented
+                count += 1
+    if display:
+        plot_images(to_display)
 
 def generate_balanced_dataset(tab: dict[str, list[str]], count: dict[str, int], result_directory: str):
     target_per_class = min(count.values()) * (len(AUGMENTATIONS) + 1) # adding the original ones
@@ -60,31 +71,56 @@ def generate_balanced_dataset(tab: dict[str, list[str]], count: dict[str, int], 
     per_image = determine_augmentation_per_images(count, missing)
 
     for _class, files in tab.items():
-        print(f"Generating augmented images for {_class}..")
-        copy_original_images(tab, result_directory)
-        generate_image(
-            os.path.join(result_directory, _class),
-            files,
-            per_image[_class], 
-            missing[_class])
+        log(f"Generating {missing[_class]} augmented images for {_class}..")
 
-def split_dataset(dataset_path: str, split: float):
-    directory_name = os.path.basename(dataset_path)
+        generate_augmentation(join(result_directory, _class), files, per_image[_class], missing[_class])
 
+def split_dataset(dataset_path: str, final_prefix: str, split: float):
     data = Loader(dataset_path).parse()
 
     for _class, files in data.items():
-        training_path = os.path.join(f"{directory_name}_training", _class)
-        validation_path = os.path.join(f"{directory_name}_validation", _class)
+        training_path = join(f"{final_prefix}_training", _class)
+        validation_path = join(f"{final_prefix}_validation", _class)
 
         os.makedirs(training_path, exist_ok=True)
         os.makedirs(validation_path, exist_ok=True)
-    
+
         split_index = int(len(files) * split)
         for i, file in enumerate(files):
             name = os.path.basename(file)
 
             if i < split_index:
-                shutil.copyfile(file, os.path.join(validation_path, name))
+                shutil.copyfile(file, join(validation_path, name))
             else:
-                shutil.copyfile(file, os.path.join(training_path, name))
+                shutil.copyfile(file, join(training_path, name))
+
+def dist_parsing(value):
+    float_v = float(value)
+
+    if not (0.0 < float_v < 1.0):
+        raise ArgumentTypeError("Float value for distribution must be between 0 and 1!")
+    else:
+        return float_v
+
+def main():
+    parser = ArgumentParser()
+    parser.add_argument("path", help="The path to the dataset or the image to be augmented")
+    parser.add_argument("--split", type=dist_parsing, help="If you want to seperate result into training/validation (ex=0.1; for 10%% validation, 90%% training)")
+
+    args = parser.parse_args()
+    if not (os.path.exists(args.path)):
+        log("Path do not exist!") and exit()
+
+    is_one_file = not os.path.isdir(args.path)
+
+    if is_one_file:
+        generate_augmentation("./", [args.path], 6, 6, True)
+    else:
+        loader = Loader(args.path)
+        generate_balanced_dataset(loader.parse(), loader.count(), args.path)
+
+    if args.split and not is_one_file:
+        split_dataset(args.path, os.path.basename(args.path), args.split)
+
+if __name__ == "__main__":
+    main()
