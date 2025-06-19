@@ -6,16 +6,18 @@ from os import path
 import pandas as pd
 
 AUGMENTATIONS = [Augs.rotate, Augs.contrast, Augs.brightness, Augs.projective, Augs.blur, Augs.scale]
-TRANSFORMATIONS = [Trsf.grayscale, Trsf.pseudocolored, Trsf.shape_size, Trsf.pseudolandmarks, Trsf.mask]
+TRANSFORMATIONS = [Trsf.grayscale, Trsf.pseudocolored, Trsf.shape_size, Trsf.pseudolandmarks, Trsf.mask, Trsf.color_histogram]
 
 def find_transformations(image_path: str):
     name, ext = Loader.get_name_ext(image_path)
     dirname = path.dirname(image_path)
-    result = []
+    result = [image_path]
 
     for tr in TRANSFORMATIONS:
+        if tr == Trsf.color_histogram:
+            ext = ".csv" 
         filepath = f"{dirname}/{name}_{tr.__name__}{ext}"
-        
+
         if path.exists(filepath):
             result.append(filepath)
     return result
@@ -24,7 +26,6 @@ def runner(dataset: str, result: str):
     rows = []
     load = Loader(dataset)
     for _class, files in load.parse().items():
-
         for file in files:
             img_name = path.basename(file)
             split = img_name.split("_")
@@ -32,17 +33,17 @@ def runner(dataset: str, result: str):
             if len(split) == 1: # original img
                 rows.append({
                     "class": _class,
-                    "image": file,
-                    "transformed_images": find_transformations(file)
+                    "original": img_name,
+                    "images": find_transformations(file)
                 })
             if len(split) == 2: # maybe an original augmented image
                 transformations = find_transformations(file)
 
-                if transformations:
+                if len(transformations) == 7:
                     rows.append({
                         "class": _class,
-                        "image": file,
-                        "transformed_images": transformations
+                        "original": img_name,
+                        "images": transformations
                     })
 
     df = pd.DataFrame(rows)
