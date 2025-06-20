@@ -1,3 +1,5 @@
 plantcv
 pillow
 numpy
+tqdm
+
