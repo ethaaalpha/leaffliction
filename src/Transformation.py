@@ -58,36 +58,34 @@ def plot_images(images: dict[str, np.ndarray | Figure]):
     plt.show()
 
 def generate_transformation(result_directory: str, files: list[str], only_display: bool = False) -> list[str]:
-    count = 0
-    total = len(files)
     images = []
     to_display = {}
 
     os.makedirs(result_directory, exist_ok=True)
-    for img_path in files:
+    for count, img_path in enumerate(files):
         transformator = Trsf(img_path)
         name, ext = Loader.get_name_ext(img_path)
 
-        log_dynamic(f"working on: {name.ljust(42)} ({count}/{total})")
+        log_dynamic(f"working on: {name.ljust(42)} ({count}/{len(files)})")
 
         # image classic transformations
         for t in IMG_TRANSFORMATIONS:
             image_transf = t(transformator)
             transf_name = t.__name__
 
-            to_display[transf_name] = image_transf
-            if not only_display:
+            if only_display:
+                to_display[transf_name] = image_transf
+            else:
                 images.append(join(result_directory, f"{name}_{transf_name}{ext.lower()}"))
                 transformator.export_image(image_transf, images[-1])
 
-        # color histogram in csv
+        # color histogram specific
         hist_data = transformator.color_histogram()
-        if not only_display:
-            hist_data.to_csv(join(result_directory, f"{name}_color_histogram.csv"))
-        else:
+        if only_display:
             to_display["color_histogram"] = get_histogram_figure(hist_data)
+        else:
+            hist_data.to_csv(join(result_directory, f"{name}_color_histogram.csv"))
 
-        count += 1
     if only_display:
         plot_images(to_display)
     return images
