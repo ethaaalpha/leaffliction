@@ -22,9 +22,10 @@ def find_transformations(image_path: str):
             result.append(filepath)
     return result
 
-def runner(dataset: str, result: str):
+def generate_metadata(dataset: str, result: str, empty_class = False):
     rows = []
-    load = Loader(dataset)
+    load = Loader(dataset, direct_dir=empty_class)
+
     for _class, files in load.parse().items():
         for file in files:
             img_name = path.basename(file)
@@ -35,7 +36,7 @@ def runner(dataset: str, result: str):
 
                 if len(transformations) == 7:
                     rows.append({
-                        "class": _class,
+                        "class": _class if not empty_class else "",
                         "original": img_name,
                         "images": transformations
                     })
@@ -49,7 +50,7 @@ def main():
     parser.add_argument("csv", help="The name of the csv file result")
 
     args = parser.parse_args()
-    runner(args.path, args.csv)
+    generate_metadata(args.path, args.csv)
 
 if __name__ == "__main__":
     main()

@@ -6,3 +6,4 @@ images/
 dataset*
 transformed_directory/
 .DS_Store
+datasets/
