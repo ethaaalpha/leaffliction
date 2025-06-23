@@ -104,7 +104,8 @@ def main():
 
     args = parser.parse_args()
     if not (os.path.exists(args.path)):
-        log("Path do not exist!") and exit()
+        log("Path do not exist!")
+        return
 
     is_one_file = not os.path.isdir(args.path)
 
@@ -112,10 +113,14 @@ def main():
         generate_transformation("./", [args.path], True)
     else:
         tab = Loader(args.path, True).parse()
+        tab[args.dst] = tab["files"]
+        tab.pop("files")
+
+        generate_transformed_dataset(tab, "./")
 
         if args.original:
-            copy_original_images(tab, args.dst)
-        generate_transformed_dataset(tab, args.dst)
+            copy_original_images(tab, "./")
+
 
 if __name__ == "__main__":
     main()
