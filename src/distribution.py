@@ -4,6 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from preprocessing.loader import Loader
 
+
 def generate_histogram(data: dict[str, int]):
     classes = list(data.keys())
     counts = list(data.values())
@@ -17,6 +18,7 @@ def generate_histogram(data: dict[str, int]):
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
+
 
 if __name__ == "__main__":
     if (len(sys.argv) == 2 and os.path.exists(sys.argv[1])):

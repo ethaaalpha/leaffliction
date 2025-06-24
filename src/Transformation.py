@@ -13,7 +13,9 @@ from os.path import join
 
 random.seed(42)
 
-IMG_TRANSFORMATIONS = [Trsf.grayscale, Trsf.pseudocolored, Trsf.shape_size, Trsf.pseudolandmarks, Trsf.mask]
+IMG_TRANSFORMATIONS = [Trsf.grayscale, Trsf.pseudocolored,
+                       Trsf.shape_size, Trsf.pseudolandmarks, Trsf.mask]
+
 
 def get_histogram_figure(dataframe: DataFrame) -> Figure:
     fig, ax = plt.subplots()
@@ -32,11 +34,13 @@ def get_histogram_figure(dataframe: DataFrame) -> Figure:
 
     return fig
 
+
 def save_histogram_as_image(image_path: str, result_path: str):
     transformator = Trsf(image_path)
 
     histgram = get_histogram_figure(transformator.color_histogram())
     histgram.savefig(result_path)
+
 
 def plot_images(images: dict[str, np.ndarray | Figure]):
     _, axs = plt.subplots(2, 3)
@@ -57,11 +61,12 @@ def plot_images(images: dict[str, np.ndarray | Figure]):
     plt.tight_layout()
     plt.show()
 
-def generate_transformation(result_directory: str, files: list[str], only_display: bool = False) -> list[str]:
+
+def generate_transformation(dir, files, only_display=False):
     images = []
     to_display = {}
 
-    os.makedirs(result_directory, exist_ok=True)
+    os.makedirs(dir, exist_ok=True)
     for count, img_path in enumerate(files):
         transformator = Trsf(img_path)
         name, ext = Loader.get_name_ext(img_path)
@@ -76,7 +81,7 @@ def generate_transformation(result_directory: str, files: list[str], only_displa
             if only_display:
                 to_display[transf_name] = image_transf
             else:
-                images.append(join(result_directory, f"{name}_{transf_name}{ext.lower()}"))
+                images.append(join(dir, f"{name}_{transf_name}{ext.lower()}"))
                 transformator.export_image(image_transf, images[-1])
 
         # color histogram specific
@@ -84,23 +89,34 @@ def generate_transformation(result_directory: str, files: list[str], only_displa
         if only_display:
             to_display["color_histogram"] = get_histogram_figure(hist_data)
         else:
-            hist_data.to_csv(join(result_directory, f"{name}_color_histogram.csv"))
+            hist_data.to_csv(join(dir, f"{name}_color_histogram.csv"))
 
     if only_display:
         plot_images(to_display)
     return images
 
-def generate_transformed_dataset(tab: dict[str, list[str]], result_directory: str):
-    for _class, files in tab.items():
-        log(f"Generating {len(files) * (len(IMG_TRANSFORMATIONS) + 1)} transformed images for {_class}..")
 
-        generate_transformation(join(result_directory, _class), files)
+def generate_transformed_dataset(tab: dict[str, list[str]], dir: str):
+    for _class, files in tab.items():
+        log(f"Generating {len(files) * (len(IMG_TRANSFORMATIONS) + 1)} "
+            "transformed images for {_class}..")
+
+        generate_transformation(join(dir, _class), files)
+
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument("path", help="The path to the dataset or the image to be transformed")
-    parser.add_argument("--dst", default="transformed_directory", help="If the dataset is a folder where the result will be!")
-    parser.add_argument("--original", action=BooleanOptionalAction, help="If present originals images will also be copied!")
+    parser.add_argument(
+        "path",
+        help="The path to the dataset or the image to be transformed")
+    parser.add_argument(
+        "--dst",
+        default="transformed_directory",
+        help="If the dataset is a folder where the result will be!")
+    parser.add_argument(
+        "--original",
+        action=BooleanOptionalAction,
+        help="If present originals images will also be copied!")
 
     args = parser.parse_args()
     if not (os.path.exists(args.path)):

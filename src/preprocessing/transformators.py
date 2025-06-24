@@ -4,6 +4,7 @@ import numpy as np
 from matplotlib.figure import Figure
 from plantcv import plantcv as pcv
 
+
 class Transformators:
     def __init__(self, image_path: str):
         self._image = self.load_image(image_path)
@@ -17,7 +18,8 @@ class Transformators:
         height, width = gray.shape
         dpi = 100
 
-        fig = pcv.visualize.pseudocolor(gray_img=gray, mask=mask, background="image", 
+        fig = pcv.visualize.pseudocolor(
+            gray_img=gray, mask=mask, background="image",
             axes=False, colorbar=False, cmap='viridis')
         # set dims
         fig.set_dpi(dpi)
@@ -28,7 +30,7 @@ class Transformators:
         fig.tight_layout(pad=0)
 
         return fig
-    
+
     def shape_size(self) -> np.ndarray:
         mask = self.mask()
 
@@ -37,7 +39,9 @@ class Transformators:
     def pseudolandmarks(self) -> np.ndarray:
         size = 4
         mask = self.mask()
-        top, bottom, center_v = pcv.homology.x_axis_pseudolandmarks(img=self._image, mask=mask)
+        top, bottom, center_v = pcv.homology.x_axis_pseudolandmarks(
+            img=self._image,
+            mask=mask)
 
         # as in plantcv
         cpy = np.copy(self._image)
@@ -63,7 +67,8 @@ class Transformators:
     def color_histogram(self) -> Figure | pandas.DataFrame:
         mask = self.mask()
 
-        _, hist_data = pcv.visualize.histogram(self._image, mask, hist_data=True)
+        _, hist_data = pcv.visualize.histogram(
+            self._image, mask, hist_data=True)
         return hist_data
 
     @classmethod

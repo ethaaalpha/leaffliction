@@ -1,5 +1,6 @@
 import os
 
+
 class Loader():
     def __init__(self, path, direct_dir=False):
         self._path = path
@@ -19,10 +20,11 @@ class Loader():
         else:
             for cat in ldir:
                 cat_path = os.path.join(self._path, cat)
-                result[cat] = [os.path.join(cat_path, path) for path in sorted(os.listdir(cat_path))]
+                result[cat] = [os.path.join(cat_path, path)
+                               for path in sorted(os.listdir(cat_path))]
 
         return result
-    
+
     def count(self) -> dict[str, int]:
         tab = self.parse()
 
