@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 
+
 def train_model(
     model,
     train_loader,
@@ -11,12 +12,15 @@ def train_model(
     lr=1e-4,
     device='cuda' if torch.cuda.is_available() else 'cpu',
     save_path='best_model.pt',
-    early_stopping_patience=5  
+    early_stopping_patience=5
 ):
     model = model.to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=3, factor=0.5)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
+                                                           mode='min',
+                                                           patience=3,
+                                                           factor=0.5)
 
     best_val_acc = 0.0
     epochs_without_improvement = 0 
@@ -25,7 +29,9 @@ def train_model(
         model.train()
         train_loss, train_correct, train_total = 0, 0, 0
 
-        for imgs, hist, labels in tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs} - Train"):
+        for imgs, hist, labels in tqdm(train_loader,
+                                       desc=f"Epoch {epoch+1}/\
+                                        {num_epochs} - Train"):
             imgs = [img.to(device) for img in imgs]
             hist = hist.to(device)
             labels = labels.to(device)
@@ -69,7 +75,8 @@ def train_model(
         print(f"[Scheduler] Learning rate updated to {current_lr:.6f}")
 
         print(f"\nEpoch {epoch+1}/{num_epochs}")
-        print(f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc*100:.2f}%")
+        print(f"Train Loss: {train_loss:.4f} | \
+            Train Acc: {train_acc*100:.2f}%")
         print(f"Val   Loss: {val_loss:.4f} | Val   Acc: {val_acc*100:.2f}%")
 
         if val_acc > best_val_acc:
@@ -79,10 +86,12 @@ def train_model(
             epochs_without_improvement = 0 
         else:
             epochs_without_improvement += 1
-            print(f"⏸️ No improvement for {epochs_without_improvement} epoch(s).")
+            print(f"⏸️ No improvement for \
+                {epochs_without_improvement} epoch(s).")
 
         if epochs_without_improvement >= early_stopping_patience:
-            print(f"⛔ Early stopping triggered. No improvement after {early_stopping_patience} epochs.")
+            print(f"⛔ Early stopping triggered. No improvement \
+                after {early_stopping_patience} epochs.")
             break
 
     print(f"\n🏁 Training complete. Best Val Acc: {best_val_acc*100:.2f}%")

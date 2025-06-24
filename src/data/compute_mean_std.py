@@ -5,6 +5,7 @@ from tqdm import tqdm
 import pandas as pd
 import ast
 
+
 def compute_mean_std(csv_path):
     df = pd.read_csv(csv_path)
     transform = transforms.ToTensor()

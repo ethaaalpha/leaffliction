@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class DepthwiseSeparableConv(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1):
         super().__init__()
@@ -16,6 +17,7 @@ class DepthwiseSeparableConv(nn.Module):
 
     def forward(self, x):
         return self.block(x)
+
 
 class MiniConv(nn.Module):
     def __init__(self, out_dim=64):
@@ -35,15 +37,16 @@ class MiniConv(nn.Module):
         x = self.encoder(x)
         return x.view(x.size(0), -1)
 
+
 class MiniMobileNet(nn.Module):
     def __init__(self, csv_dim=1503, n_classes=8, img_feat_dim=64):
         super().__init__()
-        self.encoder_original      = MiniConv(img_feat_dim)
-        self.encoder_grayscale     = MiniConv(img_feat_dim)
-        self.encoder_pseudocolor   = MiniConv(img_feat_dim)
-        self.encoder_shapesize     = MiniConv(img_feat_dim)
-        self.encoder_landmarks     = MiniConv(img_feat_dim)
-        self.encoder_mask          = MiniConv(img_feat_dim)
+        self.encoder_original = MiniConv(img_feat_dim)
+        self.encoder_grayscale = MiniConv(img_feat_dim)
+        self.encoder_pseudocolor = MiniConv(img_feat_dim)
+        self.encoder_shapesize = MiniConv(img_feat_dim)
+        self.encoder_landmarks = MiniConv(img_feat_dim)
+        self.encoder_mask = MiniConv(img_feat_dim)
 
         self.csv_proj = nn.Sequential(
             nn.Linear(csv_dim, img_feat_dim * 2),
