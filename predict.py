@@ -40,8 +40,7 @@ def get_tmp_images(image_path: str):
         shutil.rmtree(root_dir)
 
 
-def predict(model_path, image_path, label_encoding,
-            device='cuda' if torch.cuda.is_available() else 'cpu'):
+def predict(model_path, image_path, label_encoding, device):
     transform = T.Compose([
         T.Resize((224, 224)),
         T.ToTensor(),
@@ -102,6 +101,10 @@ if __name__ == "__main__":
                         help="Path to the input image")
     parser.add_argument("--label_encoding", required=True,
                         help="Path to the label.json file")
+    parser.add_argument("--device", default="cpu",
+                        choices=["cuda", "mps", "cpu"],
+                        help="The compute device:"
+                        "cuda(nvidia, amd), mps(apple)")
     args = parser.parse_args()
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    predict(args.model, args.image, args.label_encoding, device=device)
+    predict(args.model, args.image,
+            args.label_encoding, args.device)
