@@ -4,25 +4,25 @@ from PIL import Image
 import pandas as pd
 import numpy as np
 import ast
-from sklearn.preprocessing import LabelEncoder
-import joblib
+import json
+
 
 class MultimodalDataset(Dataset):
-    def __init__(self, csv_path, transform=None, csv_dim=1503, class_names=None):
+    def __init__(self, csv_path, transform=None, csv_dim=1503,
+                 labels_json_path="labels.json"):
         self.df = pd.read_csv(csv_path)
         self.transform = transform
         self.csv_dim = csv_dim
 
-        if class_names is None:
-            self.label_encoder = LabelEncoder()
-            self.df['label'] = self.label_encoder.fit_transform(self.df['class'])
-            self.class_names = list(self.label_encoder.classes_)
-            joblib.dump(self.label_encoder, "label_encoder.pkl")
+        with open(labels_json_path, "r") as f:
+            label_map = json.load(f)
+            self.label_to_index = label_map["label_to_index"]
+            self.index_to_label = {int(k): v for k,
+                                   v in label_map["index_to_label"].items()}
+        if "class" in self.df.columns and self.df["class"].notnull().all():
+            self.df["label"] = self.df["class"].map(self.label_to_index)
         else:
-            self.class_names = class_names
-            self.label_encoder = LabelEncoder()
-            self.label_encoder.classes_ = np.array(class_names)
-            self.df['label'] = self.label_encoder.transform(self.df['class'])
+            self.df["label"] = -1
 
     def __len__(self):
         return len(self.df)
@@ -40,9 +40,12 @@ class MultimodalDataset(Dataset):
 
         hist_df = pd.read_csv(hist_path, header=None, skiprows=1)
 
-        hist_r = pd.to_numeric(hist_df[2][hist_df[4] == 'red'], errors='coerce').fillna(0).values
-        hist_g = pd.to_numeric(hist_df[2][hist_df[4] == 'green'], errors='coerce').fillna(0).values
-        hist_b = pd.to_numeric(hist_df[2][hist_df[4] == 'blue'], errors='coerce').fillna(0).values
+        hist_r = pd.to_numeric(hist_df[2][hist_df[4] == 'red'],
+                               errors='coerce').fillna(0).values
+        hist_g = pd.to_numeric(hist_df[2][hist_df[4] == 'green'],
+                               errors='coerce').fillna(0).values
+        hist_b = pd.to_numeric(hist_df[2][hist_df[4] == 'blue'],
+                               errors='coerce').fillna(0).values
 
         max_len = self.csv_dim // 3
 
