@@ -2,7 +2,7 @@ import os
 import sys
 import matplotlib
 import matplotlib.pyplot as plt
-from preprocessing.loader import Loader
+from src.preprocessing.loader import Loader
 
 
 def generate_histogram(data: dict[str, int]):

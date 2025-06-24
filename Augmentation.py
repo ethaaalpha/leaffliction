@@ -5,9 +5,9 @@ import random
 from PIL import Image as Im
 from argparse import ArgumentParser, ArgumentTypeError
 from matplotlib import pyplot as plt
-from preprocessing.augmentors import Augmentators as Augs
-from preprocessing.loader import Loader
-from utils import log, log_dynamic
+from src.preprocessing.augmentors import Augmentators as Augs
+from src.preprocessing.loader import Loader
+from src.utils import log, log_dynamic
 from os.path import join
 
 random.seed(42)

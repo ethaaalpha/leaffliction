@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
-from preprocessing.augmentors import Augmentators as Augs
-from preprocessing.transformators import Transformators as Trsf
-from preprocessing.loader import Loader
+from src.preprocessing.augmentors import Augmentators as Augs
+from src.preprocessing.transformators import Transformators as Trsf
+from src.preprocessing.loader import Loader
 from os import path
 import pandas as pd
 

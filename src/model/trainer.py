@@ -23,7 +23,7 @@ def train_model(
                                                            factor=0.5)
 
     best_val_acc = 0.0
-    epochs_without_improvement = 0 
+    epochs_without_improvement = 0
 
     for epoch in range(num_epochs):
         model.train()
@@ -83,7 +83,7 @@ def train_model(
             best_val_acc = val_acc
             torch.save(model.state_dict(), save_path)
             print("✅ Best model saved.\n")
-            epochs_without_improvement = 0 
+            epochs_without_improvement = 0
         else:
             epochs_without_improvement += 1
             print(f"⏸️ No improvement for \

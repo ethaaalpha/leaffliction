@@ -1,14 +1,14 @@
-from io import BytesIO
 import os
 import random
 import numpy as np
+from io import BytesIO
 from matplotlib import pyplot as plt
 from argparse import ArgumentParser, BooleanOptionalAction
 from matplotlib.figure import Figure
 from pandas import DataFrame
-from preprocessing.loader import Loader
-from preprocessing.transformators import Transformators as Trsf
-from utils import copy_original_images, log, log_dynamic
+from src.preprocessing.loader import Loader
+from src.preprocessing.transformators import Transformators as Trsf
+from src.utils import copy_original_images, log, log_dynamic
 from os.path import join
 
 random.seed(42)
@@ -99,7 +99,7 @@ def generate_transformation(dir, files, only_display=False):
 def generate_transformed_dataset(tab: dict[str, list[str]], dir: str):
     for _class, files in tab.items():
         log(f"Generating {len(files) * (len(IMG_TRANSFORMATIONS) + 1)} "
-            "transformed images for {_class}..")
+            f"transformed images for {_class}..")
 
         generate_transformation(join(dir, _class), files)
 

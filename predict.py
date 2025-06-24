@@ -3,19 +3,16 @@ import os
 import shutil
 import tempfile
 import torch
-import sys
 from contextlib import contextmanager
 from torchvision import transforms as T
 from src.data.MultimodalDataset import MultimodalDataset
 import json
 import matplotlib.pyplot as plt
 from PIL import Image
-
-sys.path.append("./src")
-from metadata import generate_metadata
 from Transformation import generate_transformation, save_histogram_as_image
-from preprocessing.loader import Loader
-from model.MiniMobileNet import MiniMobileNet
+from metadata import generate_metadata
+from src.preprocessing.loader import Loader
+from src.model.MiniMobileNet import MiniMobileNet
 
 
 @contextmanager
