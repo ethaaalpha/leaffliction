@@ -31,6 +31,7 @@ def get_histogram_figure(dataframe: DataFrame) -> Figure:
     ax.legend()
     ax.set_xlabel('Pixel Intensity')
     ax.set_ylabel('Proportion (%)')
+    plt.close()
 
     return fig
 
@@ -52,10 +53,10 @@ def plot_images(images: dict[str, np.ndarray | Figure]):
             buf = BytesIO()
             img.savefig(buf, format='png')
             buf.seek(0)
-            ax.imshow(plt.imread(buf))
+            ax.imshow(plt.imread(buf), cmap="gray")
             ax.axis("off")
         else:
-            ax.imshow(img)
+            ax.imshow(img, cmap="gray")
             ax.axis("off")
 
     plt.tight_layout()
