@@ -31,7 +31,6 @@ def get_label_encoding_path(dataset_dir: str):
 
 def predict_batch(model_path, dataset_dir_path, device):
     with get_label_encoding_path(dataset_dir_path) as csv_path:
-        os.system(f"ls -la {os.path.dirname(csv_path)}")
         # ici t'as le csv path comme pour le train
         # pareil que pour le predict quand t'es plus dans
         # le with tout se supprime (le csv avec les images associées)
