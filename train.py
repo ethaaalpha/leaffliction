@@ -24,7 +24,7 @@ def train(b_size, n_workers, device):
     train_loader = DataLoader(train_dataset, batch_size=b_size,
                               shuffle=True,
                               num_workers=n_workers, pin_memory=True)
-    val_dataset = MultimodalDataset("test.csv",
+    val_dataset = MultimodalDataset("validation.csv",
                                     transform=transform, csv_dim=1503)
     val_loader = DataLoader(val_dataset, batch_size=b_size,
                             shuffle=False,
