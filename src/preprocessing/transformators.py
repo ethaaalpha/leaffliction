@@ -1,9 +1,9 @@
 import cv2
 import pandas
 import numpy as np
-import matplotlib
 from matplotlib.figure import Figure
 from plantcv import plantcv as pcv
+
 
 class Transformators:
     def __init__(self, image_path: str):
