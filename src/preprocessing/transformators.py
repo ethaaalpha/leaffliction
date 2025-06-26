@@ -1,9 +1,9 @@
 import cv2
 import pandas
 import numpy as np
+import matplotlib
 from matplotlib.figure import Figure
 from plantcv import plantcv as pcv
-
 
 class Transformators:
     def __init__(self, image_path: str):
@@ -23,8 +23,7 @@ class Transformators:
             axes=False, colorbar=False, cmap='viridis')
         # set dims
         fig.set_dpi(dpi)
-        fig.set_figheight(height / dpi)
-        fig.set_figwidth(width / dpi)
+        fig.set_size_inches(width / dpi, height / dpi, forward=False)
         # remove borders
         fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
         fig.tight_layout(pad=0)
